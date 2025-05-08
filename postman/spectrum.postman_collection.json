@@ -1,0 +1,58 @@
+{
+	"info": {
+		"_postman_id": "8d1fa1d4-63c5-464f-8f5c-c3784c5455e1",
+		"name": "spectrum",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29390462"
+	},
+	"item": [
+		{
+			"name": "/api/v1/rewards",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/v1/rewards",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"rewards"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/api/v1/customerTotalPoints",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/v1/customerTotalPoints?customer=Rahul",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"customerTotalPoints"
+					],
+					"query": [
+						{
+							"key": "customer",
+							"value": "Rahul"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
