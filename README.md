@@ -101,3 +101,13 @@ Example Response:
     "customer": "Rahul",
     "totalPoints": 115
 }
+
+*********************************************
+Postman folder in the project directory has the postman collection for API testing
+
+
+
+
+
+
+
