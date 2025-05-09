@@ -1,80 +1,92 @@
 package com.retail.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.retail.model.CustomerReward;
+import com.retail.dto.CustomerMonthlyPoints;
+import com.retail.dto.CustomerPoints;
+import com.retail.dto.CustomerRewards;
+import com.retail.exception.TransactionNotFoundException;
 import com.retail.model.CustomerTransaction;
 import com.retail.repository.TransactionRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-@ExtendWith(MockitoExtension.class)
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 public class RewardsServiceTest {
-	@Mock
-	private TransactionRepository transactionRepository;
-	@InjectMocks
-	private RewardsService rewardsService;
 
-	@BeforeEach
-	public void setup() {
-	    transactionRepository = mock(TransactionRepository.class);
-	    rewardsService = new RewardsService(transactionRepository); 
-	}
+    @Mock
+    private TransactionRepository transactionRepository;
 
-	@Test
-	public void testRewardCalculation() {
-		List<CustomerTransaction> transactions = Arrays.asList(
-				new CustomerTransaction(null, "Rahul", 120.0, LocalDate.of(2024, 1, 15)), 
-				new CustomerTransaction(null, "Rahul", 75.0, LocalDate.of(2024, 1, 20)) 
-		);
+    @InjectMocks
+    private RewardsService rewardsService;
 
-		when(transactionRepository.findAll()).thenReturn(transactions);
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
-		Map<String, CustomerReward> rewards = rewardsService.calculateRewards();
+    @Test
+    void testCalculateRewards_Success() {
+        CustomerTransaction tx1 = new CustomerTransaction(null,"Ram",120.0,  LocalDate.of(2024, 3, 10));
+        CustomerTransaction tx2 = new CustomerTransaction(null,"Ram", 80.0, LocalDate.of(2024, 3, 15));
+        when(transactionRepository.findAll()).thenReturn(List.of(tx1, tx2));
 
-		assertTrue(rewards.containsKey("Rahul"));
-		CustomerReward reward = rewards.get("Rahul");
-		assertEquals(115, reward.getTotalPoints()); 
-		assertTrue(reward.getMonthlyPoints().containsKey("JANUARY"));
-	}
-	
-	 @Test
-	    void testCalculateTotalPoints_withMixedTransactions_returnsCorrectPoints() {
-	        
-	        String customer = "Rahul";
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
 
-	        List<CustomerTransaction> transactions = List.of(
-	                new CustomerTransaction(1L, customer, 120.0, LocalDate.now()), 
-	                new CustomerTransaction(2L, customer, 75.0, LocalDate.now()),  
-	                new CustomerTransaction(3L, customer, 45.0, LocalDate.now())  
-	        );
+        assertEquals(1, rewards.size());
+        CustomerRewards reward = rewards.get(0);
+        assertEquals("Ram", reward.getCustomerName());
+        assertTrue(reward.getMonthlyPoints().containsKey("MARCH"));
+        assertEquals(reward.getTotalPoints(), reward.getMonthlyPoints().get("MARCH"));
+    }
 
-	        Mockito.when(transactionRepository.findByCustomer(customer)).thenReturn(transactions);
+    @Test
+    void testCalculateRewards_NoTransactions_ShouldThrowException() {
+        when(transactionRepository.findAll()).thenReturn(List.of());
+        assertThrows(TransactionNotFoundException.class, () -> rewardsService.calculateRewards());
+    }
 
-	       
-	        int totalPoints = rewardsService.calculateTotalPoints(customer);
+    @Test
+    void testGetCustomerPointsResponse_Success() {
+        CustomerTransaction tx1 = new CustomerTransaction(null,"Rahul", 130, LocalDate.of(2024, 4, 5));
+        when(transactionRepository.findByCustomer("Rahul")).thenReturn(List.of(tx1));
 
-	        
-	        assertEquals(115, totalPoints);
-	    }
+        CustomerPoints result = rewardsService.getCustomerPointsResponse("Rahul");
+        assertEquals("Rahul", result.getCustomerName());
+        assertTrue(result.getTotalPoints() > 0);
+    }
 
-	    @Test
-	    void testCalculateTotalPoints_withNoTransactions_returnsZero() {
-	        Mockito.when(transactionRepository.findByCustomer("Ravi")).thenReturn(List.of());
-	        assertEquals(0, rewardsService.calculateTotalPoints("Ravi"));
-	    }
+    @Test
+    void testGetCustomerPointsResponse_CustomerNotFound_ShouldThrowException() {
+        when(transactionRepository.findByCustomer("Ravi")).thenReturn(List.of());
+        assertThrows(TransactionNotFoundException.class, () -> rewardsService.getCustomerPointsResponse("Ravi"));
+    }
+
+    @Test
+    void testGetCustomerMonthlyPointsDTO_Success() {
+        CustomerTransaction tx1 = new CustomerTransaction(null,"Akash", 110,LocalDate.of(2024, 2, 20));
+        when(transactionRepository.findByCustomerAndDateBetween(eq("Akash"), any(), any()))
+                .thenReturn(List.of(tx1));
+
+        CustomerMonthlyPoints result = rewardsService.getCustomerMonthlyPoints("Akash",
+                LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 28));
+
+        assertEquals("Akash", result.getCustomerName());
+        assertEquals(result.getTotalPoints(), result.getMonthlyPoints().get("FEBRUARY"));
+    }
+
+    @Test
+    void testGetCustomerMonthlyPointsDTO_NoData_ShouldThrowException() {
+        when(transactionRepository.findByCustomerAndDateBetween(eq("Sai"), any(), any()))
+                .thenReturn(List.of());
+
+        assertThrows(TransactionNotFoundException.class, () ->
+                rewardsService.getCustomerMonthlyPoints("Sai", LocalDate.now().minusMonths(1), LocalDate.now()));
+    }
 }

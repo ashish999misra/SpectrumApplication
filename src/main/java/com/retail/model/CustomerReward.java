@@ -1,6 +1,6 @@
 package com.retail.model;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CustomerReward {
@@ -13,7 +13,7 @@ public class CustomerReward {
 	}
 
 	private String customer;
-    private Map<String, Integer> monthlyPoints = new HashMap<>();
+    private Map<String, Integer> monthlyPoints = new LinkedHashMap<>();
 
     public CustomerReward(String customer) {
         this.customer = customer;

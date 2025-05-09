@@ -53,6 +53,41 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "/api/v1/customerMonthlyPoints",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/v1/customerMonthlyPoints?customer=Ravi&from=2024-01-01&to=2024-04-27",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"v1",
+						"customerMonthlyPoints"
+					],
+					"query": [
+						{
+							"key": "customer",
+							"value": "Ravi"
+						},
+						{
+							"key": "from",
+							"value": "2024-01-01"
+						},
+						{
+							"key": "to",
+							"value": "2024-04-27"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

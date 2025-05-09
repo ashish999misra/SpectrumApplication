@@ -18,6 +18,10 @@ RewardsApplication.java
 
 controller -> RewardsController.java
 
+dto -> CustomerMonthlyPoints.java, CustomerPoints.java, CustomerReward.java
+
+exception -> CustomerNotFoundException.java, GlobalExceptionHandler.java
+
 model -> CustomerTransaction.java, CustomerReward.java
 
 repository -> TransactionRepository.java
@@ -50,12 +54,12 @@ Password: (leave blank)
 ******************************
 Sample Data to run in H2-Console
 
-
+```sql
 INSERT INTO customer_transaction(customer, amount, date) VALUES ('Rahul', 120.0, '2024-01-15');
 INSERT INTO customer_transaction(customer, amount, date) VALUES ('Rahul', 75.0, '2024-01-20');
 INSERT INTO customer_transaction(customer, amount, date) VALUES ('Ravi', 105.0, '2024-02-14');
 INSERT INTO customer_transaction(customer, amount, date) VALUES ('Ravi', 130.0, '2024-03-03');
-
+```
 
 
 *********************************
@@ -70,15 +74,16 @@ http://localhost:8081/api/v1/rewards
 
 Example Response:
 
-{
-    "Rahul": {
+```json
+[
+    {
         "customer": "Rahul",
         "monthlyPoints": {
             "JANUARY": 115
         },
         "totalPoints": 115
     },
-    "Ravi": {
+    {
         "customer": "Ravi",
         "monthlyPoints": {
             "MARCH": 110,
@@ -86,8 +91,8 @@ Example Response:
         },
         "totalPoints": 170
     }
-}
-
+]
+```
 
 
 **************************
@@ -97,10 +102,30 @@ http://localhost:8081/api/v1/customerTotalPoints?customer=Rahul
 
 Example Response:
 
+```json
 {
     "customer": "Rahul",
     "totalPoints": 115
 }
+```
+
+********************************************
+GET /api/v1/customerMonthlyPoints
+
+http://localhost:8081/api/v1/customerMonthlyPoints?customer=Ravi&from=2024-01-01&to=2025-02-27
+
+Example Response:
+
+```json
+{
+    "customer": "Ravi",
+    "monthlyPoints": {
+        "MARCH": 110,
+        "FEBRUARY": 60
+    },
+    "totalPoints": 170
+}
+```
 
 *********************************************
 Postman folder in the project directory has the postman collection for API testing

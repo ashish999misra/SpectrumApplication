@@ -1,38 +1,58 @@
 package com.retail.controller;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.retail.model.CustomerReward;
+import com.retail.dto.CustomerMonthlyPoints;
+import com.retail.dto.CustomerPoints;
+import com.retail.dto.CustomerRewards;
 import com.retail.service.RewardsService;
 
+
+//Rest controller for customer reward point operations.
 @RequestMapping("/api/v1")
 @RestController
 public class RetailController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(RetailController.class);
 
 	@Autowired
 	private RewardsService rewardsService;
 
+	//Get reward points for all customers.
 	@GetMapping("/rewards")
-	public Map<String, CustomerReward> getRewards() {
-		return rewardsService.calculateRewards();
+	public ResponseEntity<List<CustomerRewards>> getRewards() {
+		logger.info("GET /rewards - Fetching rewards for all customers");
+		List<CustomerRewards> rewards = rewardsService.calculateRewards();
+		return ResponseEntity.ok(rewards);
 	}
 
+	//Get total reward points for a specific customer.
 	@GetMapping("/customerTotalPoints")
-	public Map<String, Object> getCustomerPoints(@RequestParam String customer) {
-		int points = rewardsService.calculateTotalPoints(customer);
+	public CustomerPoints getCustomerPoints(@RequestParam String customer) {
+		logger.info("GET /customerTotalPoints - customer: {}", customer);
+		return rewardsService.getCustomerPointsResponse(customer);
 
-		Map<String, Object> response = new LinkedHashMap<>();
-		response.put("customer", customer);
-		response.put("totalPoints", points);
+	}
 
-		return response;
+	//Get monthly reward points for a customer within a date range.
+	@GetMapping("/customerMonthlyPoints")
+	public CustomerMonthlyPoints getCustomerMonthlyPoints(@RequestParam String customer,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+		
+		logger.info("GET /customerMonthlyPoints - customer: {}, from: {}, to: {}", customer, from, to);
+		return rewardsService.getCustomerMonthlyPoints(customer, from, to);
 	}
 
 }
