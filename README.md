@@ -77,17 +77,17 @@ Example Response:
 ```json
 [
     {
-        "customer": "Rahul",
+        "customerName": "Rahul",
         "monthlyPoints": {
             "JANUARY": 115
         },
         "totalPoints": 115
     },
     {
-        "customer": "Ravi",
+        "customerName": "Ravi",
         "monthlyPoints": {
-            "MARCH": 110,
-            "FEBRUARY": 60
+            "FEBRUARY": 60,
+            "MARCH": 110
         },
         "totalPoints": 170
     }
@@ -104,7 +104,7 @@ Example Response:
 
 ```json
 {
-    "customer": "Rahul",
+    "customerName": "Rahul",
     "totalPoints": 115
 }
 ```
@@ -118,10 +118,10 @@ Example Response:
 
 ```json
 {
-    "customer": "Ravi",
+    "customerName": "Ravi",
     "monthlyPoints": {
-        "MARCH": 110,
-        "FEBRUARY": 60
+        "FEBRUARY": 60,
+        "MARCH": 110
     },
     "totalPoints": 170
 }
