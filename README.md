@@ -20,7 +20,7 @@ controller -> RewardsController.java
 
 dto -> CustomerMonthlyPoints.java, CustomerPoints.java, CustomerReward.java
 
-exception -> CustomerNotFoundException.java, GlobalExceptionHandler.java
+exception -> TransactionNotFoundException.java, GlobalExceptionHandler.java
 
 model -> CustomerTransaction.java, CustomerReward.java
 
