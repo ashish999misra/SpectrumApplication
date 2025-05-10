@@ -51,6 +51,69 @@ public class RewardsServiceTest {
         when(transactionRepository.findAll()).thenReturn(List.of());
         assertThrows(TransactionNotFoundException.class, () -> rewardsService.calculateRewards());
     }
+    
+    @Test
+    void testCalculateRewards_AmountExactly50_ShouldGet0Points() {
+        CustomerTransaction tx = new CustomerTransaction(null, "Ram", 50.0, LocalDate.of(2024, 3, 10));
+        when(transactionRepository.findAll()).thenReturn(List.of(tx));
+
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
+
+        assertEquals(1, rewards.size());
+        assertEquals(0, rewards.get(0).getTotalPoints());
+    }
+    
+    @Test
+    void testCalculateRewards_AmountBetween50And100_ShouldGetCorrectPoints() {
+        CustomerTransaction tx = new CustomerTransaction(null, "Ravi", 70.0, LocalDate.of(2024, 4, 5));
+        when(transactionRepository.findAll()).thenReturn(List.of(tx));
+
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
+
+        assertEquals(1, rewards.size());
+        assertEquals(20, rewards.get(0).getTotalPoints());
+    }
+    
+    @Test
+    void testCalculateRewards_AmountOver100_ShouldGetDoublePointsAbove100() {
+        CustomerTransaction tx = new CustomerTransaction(null, "Rahul", 120.0, LocalDate.of(2024, 5, 1));
+        when(transactionRepository.findAll()).thenReturn(List.of(tx));
+
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
+
+        assertEquals(1, rewards.size());
+        assertEquals(90, rewards.get(0).getTotalPoints());
+    }
+    
+    @Test
+    void testCalculateRewards_MultipleCustomersAndMonths() {
+        CustomerTransaction tx1 = new CustomerTransaction(null, "Amit", 110.0, LocalDate.of(2024, 3, 15)); 
+        CustomerTransaction tx2 = new CustomerTransaction(null, "Amit", 60.0, LocalDate.of(2024, 4, 15));  
+        CustomerTransaction tx3 = new CustomerTransaction(null, "Neha", 130.0, LocalDate.of(2024, 3, 20)); 
+        when(transactionRepository.findAll()).thenReturn(List.of(tx1, tx2, tx3));
+
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
+
+        assertEquals(2, rewards.size());
+
+        CustomerRewards amitRewards = rewards.stream().filter(r -> r.getCustomerName().equals("Amit")).findFirst().orElseThrow();
+        assertEquals(80, amitRewards.getTotalPoints());
+        assertEquals(2, amitRewards.getMonthlyPoints().size()); 
+
+        CustomerRewards nehaRewards = rewards.stream().filter(r -> r.getCustomerName().equals("Neha")).findFirst().orElseThrow();
+        assertEquals(110, nehaRewards.getTotalPoints());
+    }
+    
+    @Test
+    void testCalculateRewards_NegativeAmount_ShouldGetZeroPoints() {
+        CustomerTransaction tx = new CustomerTransaction(null, "Ravi", -100.0, LocalDate.of(2024, 3, 10));
+        when(transactionRepository.findAll()).thenReturn(List.of(tx));
+
+        List<CustomerRewards> rewards = rewardsService.calculateRewards();
+
+        assertEquals(1, rewards.size());
+        assertEquals(0, rewards.get(0).getTotalPoints());
+    }
 
     @Test
     void testGetCustomerPointsResponse_Success() {
